@@ -15,8 +15,7 @@ const Part = ({ part, exercises }) => {
         </p>
     );
 };
-const Content = ({ parts }) => {
-    // passed the list into Content, not the course object
+const Content = ({ course: { parts } }) => {
     return (
         <div>
             <Part part={parts[0].name} exercises={parts[0].exercises} />
@@ -25,9 +24,7 @@ const Content = ({ parts }) => {
         </div>
     );
 };
-const Total = ({ course }) => {
-    // passed the course object into Total
-    const parts = course.parts;
+const Total = ({ course: { parts } }) => {
     const total_exercises = parts.reduce(
         (sum, curval) => sum + curval.exercises,
         0
@@ -60,7 +57,7 @@ const App = () => {
     return (
         <>
             <Header course={course} />
-            <Content parts={course.parts} />
+            <Content course={course} />
             <Total course={course} />
         </>
     );
