@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 
 const Entry = ({ person: { name, number } }) => (
     // console.log("Entry name:", name);
@@ -27,7 +28,8 @@ const PersonForm = ({
             name: <input value={nameValue} onChange={handleName} />
         </div>
         <div>
-            number: <input value={numberValue} onChange={handleNumber} />
+            number:{" "}
+            <input value={numberValue} onChange={handleNumber} />
         </div>
         <div>
             <button type="submit">add</button>
@@ -47,7 +49,8 @@ const Persons = ({ persons, filter }) => {
     if (filterLength > 0) {
         const usePersons = persons.filter(
             (person) =>
-                person.name.slice(0, filterLength).toLowerCase() === filter
+                person.name.slice(0, filterLength).toLowerCase() ===
+                filter
         );
         return mapPersons(usePersons);
     } else {
@@ -56,15 +59,23 @@ const Persons = ({ persons, filter }) => {
 };
 
 const App = () => {
-    const [persons, setPersons] = useState([
-        { name: "Arto Hellas", number: "040-123456", id: 0 },
-        { name: "Ada Lovelace", number: "39-44-5323523", id: 1 },
-        { name: "Dan Abramov", number: "12-43-234345", id: 2 },
-        { name: "Mary Poppendieck", number: "39-23-6423122", id: 3 },
-    ]);
+    const [persons, setPersons] = useState([]);
     const [newName, setNewName] = useState("");
     const [newNumber, setNewNumber] = useState("");
     const [newFilter, setNewFilter] = useState("");
+
+    // empty array as second arg to only trigger after the first render
+    useEffect(() => {
+        console.log("useEffect");
+        axios
+            .get("http://localhost:3001/persons")
+            .then((response) => {
+                console.log("get request", response);
+                setPersons(response.data);
+            });
+    }, []);
+
+    console.log("render", persons.length, "entries");
 
     const addPerson = (event) => {
         //don't need to do a double function because
@@ -118,7 +129,10 @@ const App = () => {
     return (
         <div>
             <h2>Phonebook</h2>
-            <Filter value={newFilter} handleChange={handleFilterChange} />
+            <Filter
+                value={newFilter}
+                handleChange={handleFilterChange}
+            />
 
             <h3>add a new</h3>
             <PersonForm
