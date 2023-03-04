@@ -3,7 +3,7 @@ const Entry = ({ person: { name, number, id }, handleDelete }) => (
     // I will use .map() to pass each object individually to Entry
     <>
         {name} {number}
-        <button key={id} onClick={handleDelete}>
+        <button className="deleteEntry" key={id} onClick={handleDelete}>
             delete
         </button>
         <br></br>

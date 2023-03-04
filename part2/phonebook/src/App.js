@@ -3,6 +3,7 @@ import entryService from "./services/persons";
 
 import Entry from "./components/Entry";
 import PersonForm from "./components/PersonForm";
+import Notification from "./components/Notification";
 
 const Filter = ({ value, handleChange }) => (
     <form>
@@ -42,6 +43,8 @@ const App = () => {
     const [newName, setNewName] = useState("");
     const [newNumber, setNewNumber] = useState("");
     const [newFilter, setNewFilter] = useState("");
+    const [successMessage, setSuccessMessage] = useState(null);
+    const [errorMessage, setErrorMessage] = useState(null);
 
     // empty array as second arg to only trigger after the first render
     useEffect(() => {
@@ -65,6 +68,13 @@ const App = () => {
         }
         return [included, included_id];
     };
+    const displayMessage = (message, setter) => {
+        setter(message);
+        setTimeout(() => {
+            setter(null);
+        }, 4000);
+    };
+
     const addPerson = (event) => {
         //don't need to do a double function because
         //this gets passed without an argument,
@@ -86,24 +96,41 @@ const App = () => {
             ) {
                 entryService
                     .update(included_id, newEntry)
-                    .then((returnedEntry) =>
+                    .then((returnedEntry) => {
                         setPersons(
                             persons.map((person) =>
                                 person.id !== included_id
                                     ? person
                                     : returnedEntry
                             )
-                        )
-                    );
+                        );
+                        displayMessage(
+                            `Updated ${returnedEntry.name}'s number to ${returnedEntry.number}`,
+                            setSuccessMessage
+                        );
+                        setNewName("");
+                        setNewNumber("");
+                    })
+                    .catch((error) => {
+                        displayMessage(
+                            `Information of ${newName} has already been removed from the server`,
+                            setErrorMessage
+                        );
+                    });
             }
         } else {
             entryService.create(newEntry).then((returnedEntry) => {
                 setPersons(persons.concat(returnedEntry));
+                displayMessage(
+                    `Added ${returnedEntry.name}`,
+                    setSuccessMessage
+                );
                 setNewName("");
                 setNewNumber("");
             });
         }
     };
+
     const handleNameChange = (event) => {
         //event.target = input field
         // .value is the input value (newName)
@@ -130,6 +157,10 @@ const App = () => {
             entryService.deleteId(id).then((response) => {
                 console.log(`Status: ${response.statusText}`);
                 setPersons(persons.filter((person) => person.id !== id));
+                displayMessage(
+                    `Deleted ${entryToDelete.name}`,
+                    setSuccessMessage
+                );
             });
         }
     };
@@ -137,6 +168,10 @@ const App = () => {
     return (
         <div>
             <h2>Phonebook</h2>
+            <Notification message={successMessage} className="success" />
+
+            <Notification message={errorMessage} className="error" />
+
             <Filter value={newFilter} handleChange={handleFilterChange} />
 
             <h3>add a new</h3>

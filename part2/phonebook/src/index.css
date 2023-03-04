@@ -1,0 +1,26 @@
+.deleteEntry:hover {
+    color: red;
+    background-color: lightgray;
+}
+
+.success {
+    color: darkgreen;
+    background: lightgreen;
+    font-size: 20px;
+    font-weight: bold;
+    border-style: solid;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.error {
+    color: darkred;
+    background: plum;
+    font-size: 20px;
+    font-weight: bold;
+    border-style: solid;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+}
