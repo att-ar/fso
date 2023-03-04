@@ -1,14 +1,8 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import entryService from "./services/persons";
 
-const Entry = ({ person: { name, number } }) => (
-    // console.log("Entry name:", name);
-    // I will use .map() to pass each object individually to Entry
-    <>
-        {name} {number}
-        <br></br>
-    </>
-);
+import Entry from "./components/Entry";
+import PersonForm from "./components/PersonForm";
 
 const Filter = ({ value, handleChange }) => (
     <form>
@@ -16,32 +10,18 @@ const Filter = ({ value, handleChange }) => (
         <input value={value} onChange={handleChange}></input>
     </form>
 );
-const PersonForm = ({
-    handleSubmit,
-    nameValue,
-    handleName,
-    numberValue,
-    handleNumber,
-}) => (
-    <form onSubmit={handleSubmit}>
-        <div>
-            name: <input value={nameValue} onChange={handleName} />
-        </div>
-        <div>
-            number:{" "}
-            <input value={numberValue} onChange={handleNumber} />
-        </div>
-        <div>
-            <button type="submit">add</button>
-        </div>
-    </form>
-);
 
-const Persons = ({ persons, filter }) => {
+const Persons = ({ persons, filter, handleDelete }) => {
     const mapPersons = (persons) =>
         persons.map((person) => {
             // console.log("Numbers:", person.name, person.number);
-            return <Entry key={person.name} person={person} />;
+            return (
+                <Entry
+                    key={person.name}
+                    person={person}
+                    handleDelete={() => handleDelete(person.id)}
+                />
+            );
         });
 
     const filterLength = filter.length;
@@ -49,8 +29,7 @@ const Persons = ({ persons, filter }) => {
     if (filterLength > 0) {
         const usePersons = persons.filter(
             (person) =>
-                person.name.slice(0, filterLength).toLowerCase() ===
-                filter
+                person.name.slice(0, filterLength).toLowerCase() === filter
         );
         return mapPersons(usePersons);
     } else {
@@ -66,45 +45,63 @@ const App = () => {
 
     // empty array as second arg to only trigger after the first render
     useEffect(() => {
-        console.log("useEffect");
-        axios
-            .get("http://localhost:3001/persons")
-            .then((response) => {
-                console.log("get request", response);
-                setPersons(response.data);
-            });
+        console.log("effect");
+        entryService.getAll().then((initialPeople) => {
+            setPersons(initialPeople);
+        });
     }, []);
 
     console.log("render", persons.length, "entries");
 
+    const isIncluded = () => {
+        let included = false;
+        let included_id;
+        for (let { name, id } of persons) {
+            included = name === newName;
+            if (included) {
+                included_id = id;
+                break;
+            }
+        }
+        return [included, included_id];
+    };
     const addPerson = (event) => {
         //don't need to do a double function because
         //this gets passed without an argument,
         //event is filled automatically by the form
         event.preventDefault();
-        console.log("button clicked name", event.target);
+        console.log("button clicked", event.target);
 
-        let included = false;
-        for (let { name } of persons) {
-            if (included) {
-                break;
-            } else {
-                included = name === newName;
-            }
-        }
+        const [included, included_id] = isIncluded();
+        const newEntry = {
+            name: newName,
+            number: newNumber,
+        };
 
         if (included) {
-            setNewName("");
-            alert(`${newName} is already added to the phonebook.`);
+            if (
+                window.confirm(
+                    `${newName} is already added to the phonebook, replace the old number with a new one?`
+                )
+            ) {
+                entryService
+                    .update(included_id, newEntry)
+                    .then((returnedEntry) =>
+                        setPersons(
+                            persons.map((person) =>
+                                person.id !== included_id
+                                    ? person
+                                    : returnedEntry
+                            )
+                        )
+                    );
+            }
         } else {
-            const newEntry = {
-                name: newName,
-                number: newNumber,
-                id: persons.length,
-            };
-            setPersons(persons.concat(newEntry)); //adds the name
-            setNewName(""); //resets the input field
-            setNewNumber("");
+            entryService.create(newEntry).then((returnedEntry) => {
+                setPersons(persons.concat(returnedEntry));
+                setNewName("");
+                setNewNumber("");
+            });
         }
     };
     const handleNameChange = (event) => {
@@ -126,13 +123,21 @@ const App = () => {
         console.log("newFilter:", event.target.value.toLowerCase());
     };
 
+    const handleDelete = (id) => {
+        const entryToDelete = persons.find((person) => person.id === id);
+        if (window.confirm(`Delete '${entryToDelete.name}'?`)) {
+            console.log("entry to delete", entryToDelete);
+            entryService.deleteId(id).then((response) => {
+                console.log(`Status: ${response.statusText}`);
+                setPersons(persons.filter((person) => person.id !== id));
+            });
+        }
+    };
+
     return (
         <div>
             <h2>Phonebook</h2>
-            <Filter
-                value={newFilter}
-                handleChange={handleFilterChange}
-            />
+            <Filter value={newFilter} handleChange={handleFilterChange} />
 
             <h3>add a new</h3>
             <PersonForm
@@ -144,7 +149,12 @@ const App = () => {
             />
 
             <h3>Numbers</h3>
-            <Persons persons={persons} filter={newFilter} />
+
+            <Persons
+                persons={persons}
+                filter={newFilter}
+                handleDelete={handleDelete}
+            />
         </div>
     );
 };
