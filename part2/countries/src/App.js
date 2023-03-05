@@ -1,97 +1,85 @@
 import { useState, useEffect } from "react";
 
 import getAll from "./services/countries";
+import Countries from "./components/display";
 
 const Filter = ({ value, handleChange }) => (
     <form>
-        find countries <input value={value} onChange={handleChange}></input>
+        Find countries <input value={value} onChange={handleChange}></input>
     </form>
 );
-
-const Flag = ({ src, alt }) => {
-    return <img src={src} alt={alt} height="100" width="150" border="1"></img>;
-};
-
-const Country = ({ name, capital, area, languages, flags }) => {
-    const mapLanguages = (langues) =>
-        Object.values(langues).map((langue) => <li key={langue}>{langue}</li>);
-    return (
-        <div>
-            <h2>{name}</h2>
-            <p>
-                Capital: {capital}
-                <br />
-                Area: {area}
-            </p>
-            <div>
-                <h3>languages:</h3>
-                <ul>{mapLanguages(languages)}</ul>
-            </div>
-            <div>
-                <Flag src={flags.svg} alt={flags.alt} />
-            </div>
-        </div>
-    );
-};
-const Countries = ({ filter, countries }) => {
-    const filteredCountries = countries.filter((country) =>
-        country.name.common.toLowerCase().includes(filter)
-    );
-
-    switch (true) {
-        case filteredCountries.length > 11:
-            return <p>Too many countries, choose another filter</p>;
-        case filteredCountries.length < 11 && filteredCountries.length > 1:
-            return filteredCountries.map((country) => (
-                <p key={country.name.common}>{country.name.common}</p>
-            ));
-        case filteredCountries.length === 1:
-            console.log("Country name:", filteredCountries[0].name.common);
-            return (
-                <Country
-                    // key={filteredCountries[0].name.common}
-                    name={filteredCountries[0].name.common}
-                    capital={filteredCountries[0].capital[0]}
-                    area={filteredCountries[0].area}
-                    languages={filteredCountries[0].languages}
-                    flags={filteredCountries[0].flags}
-                />
-            );
-        default:
-            return <p>No country's common name matches the filter: {filter}</p>;
-    }
-};
 
 const App = () => {
     const [countries, setCountries] = useState([]);
     const [newFilter, setNewFilter] = useState("");
-
-    const handleFilterChange = (event) => {
-        console.log(event.target.value);
-        setNewFilter(event.target.value.toLowerCase());
-    };
+    const [showCountries, setShowCountries] = useState([]);
+    const [filteredCountries, setFilteredCountries] = useState([]);
 
     // I will attempt the method with a [] as the 2nd parameter:
     // I figure avoiding GET calls everytime a letter is typed would be nice.
     useEffect(() => {
         getAll().then((allCountries) => {
-            console.log(allCountries[0]);
             setCountries(allCountries);
+            setFilteredCountries(allCountries);
+            setNewFilter("");
         });
     }, []);
 
     console.log(`Rendered ${countries.length} countries`);
 
-    return (
-        <>
-            <div>
-                <Filter value={newFilter} handleChange={handleFilterChange} />
-            </div>
-            <div>
-                <Countries filter={newFilter} countries={countries} />
-            </div>
-        </>
-    );
+    const handleFilterChange = (event) => {
+        //sets newFilter to the form input value
+        console.log(event.target.value);
+        const updatedFilter = event.target.value.toLowerCase();
+        setNewFilter(updatedFilter);
+
+        //filters the countries accordingly and sets filteredCountries
+        //I keep countries and filteredCountries separate
+        // so that countries is never mutated
+        const updatedFilteredCountries = countries.filter((country) =>
+            country.name.common.toLowerCase().includes(updatedFilter)
+        );
+        setFilteredCountries(updatedFilteredCountries);
+
+        // this array controls whether to show or hide a country's information
+        // this works via the toggleShow() event handler
+        // here it is simply being initialized and filled with false
+        const newShowCountries = [];
+        newShowCountries.length = updatedFilteredCountries.length;
+        newShowCountries.fill(false);
+        setShowCountries(newShowCountries);
+    };
+
+    const toggleShow = (idx) => {
+        // toggles the state determining the display of a country's information
+        console.log(`show/hide was clicked at idx ${idx}`);
+        const newShowCountries = [...showCountries];
+        newShowCountries[idx] = !newShowCountries[idx];
+        setShowCountries(newShowCountries);
+    };
+
+    if (countries.length > 0) {
+        return (
+            <>
+                <div>
+                    <Filter
+                        value={newFilter}
+                        handleChange={handleFilterChange}
+                    />
+                </div>
+                <div>
+                    <Countries
+                        filter={newFilter}
+                        countries={filteredCountries}
+                        showCountries={showCountries}
+                        toggleShow={toggleShow}
+                    />
+                </div>
+            </>
+        );
+    } else {
+        return <p>Loading...</p>;
+    }
 };
 
 export default App;
