@@ -43,15 +43,13 @@ const Countries = ({ filter, countries }) => {
             return <p>Too many countries, choose another filter</p>;
         case filteredCountries.length < 11 && filteredCountries.length > 1:
             return filteredCountries.map((country) => (
-                <>
-                    {country.name.common}
-                    <br />
-                </>
+                <p key={country.name.common}>{country.name.common}</p>
             ));
         case filteredCountries.length === 1:
             console.log("Country name:", filteredCountries[0].name.common);
             return (
                 <Country
+                    // key={filteredCountries[0].name.common}
                     name={filteredCountries[0].name.common}
                     capital={filteredCountries[0].capital[0]}
                     area={filteredCountries[0].area}
