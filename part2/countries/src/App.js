@@ -15,8 +15,6 @@ const App = () => {
     const [showCountries, setShowCountries] = useState([]);
     const [filteredCountries, setFilteredCountries] = useState([]);
     const [newWeather, setNewWeather] = useState({});
-    // the loadWeather state will be used to control the fetch of weather data
-    // via useEffect()
 
     // I will attempt the method with a [] as the 2nd parameter:
     // I figure avoiding GET calls everytime a letter is typed would be nice.
@@ -45,9 +43,7 @@ const App = () => {
         );
         setFilteredCountries(updatedFilteredCountries);
 
-        //set the state of loadWeather to the latitude and longitude of the capital
-        // which in turn causes a useEffect to set newWeather to the weather of the capital
-        // using the openweathermap api
+        //sets newWeather to the capital's weather
         if (updatedFilteredCountries.length === 1) {
             const capitalLatitude =
                 updatedFilteredCountries[0].capitalInfo.latlng[0];

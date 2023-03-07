@@ -1,10 +1,5 @@
 import Weather from "./Weather";
 
-// do the useEffect in App, with loadWeather as the latitude and longitude
-// and it only changes when the one country condition is reached
-// add a condition that loadWeather.latitiude is not null,
-// otherwise it will try to fetch with no latitude or longitude
-
 const Button = ({ text, toggleShow }) => {
     return <button onClick={toggleShow}>{text}</button>;
 };
