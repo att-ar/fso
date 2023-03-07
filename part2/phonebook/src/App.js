@@ -116,6 +116,9 @@ const App = () => {
                             `Information of ${newName} has already been removed from the server`,
                             setErrorMessage
                         );
+                        setPersons(
+                            persons.filter((person) => person.name !== newName)
+                        );
                     });
             }
         } else {
