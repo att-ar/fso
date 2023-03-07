@@ -1,3 +1,10 @@
+import Weather from "./Weather";
+
+// do the useEffect in App, with loadWeather as the latitude and longitude
+// and it only changes when the one country condition is reached
+// add a condition that loadWeather.latitiude is not null,
+// otherwise it will try to fetch with no latitude or longitude
+
 const Button = ({ text, toggleShow }) => {
     return <button onClick={toggleShow}>{text}</button>;
 };
@@ -67,7 +74,13 @@ const ListCountry = ({ countries, showCountries, toggleShow }) => {
     });
 };
 
-const Countries = ({ filter, countries, showCountries, toggleShow }) => {
+const Countries = ({
+    filter,
+    countries,
+    showCountries,
+    newWeather,
+    toggleShow,
+}) => {
     //responsible for displaying the countries
     switch (true) {
         case countries.length > 11:
@@ -87,15 +100,28 @@ const Countries = ({ filter, countries, showCountries, toggleShow }) => {
 
         case countries.length === 1:
             const result = countries[0];
+            const { temperature, iconLink, iconAlt, windSpeed } = {
+                ...newWeather,
+            };
+
             return (
-                <SingleCountry
-                    key={result.name.common}
-                    name={result.name.common}
-                    capital={result.capital[0]}
-                    area={result.area}
-                    languages={result.languages}
-                    flags={result.flags}
-                />
+                <>
+                    <SingleCountry
+                        key={result.name.common}
+                        name={result.name.common}
+                        capital={result.capital[0]}
+                        area={result.area}
+                        languages={result.languages}
+                        flags={result.flags}
+                    />
+                    <Weather
+                        capital={result.capital[0]}
+                        temperature={temperature}
+                        iconLink={iconLink}
+                        iconAlt={iconAlt}
+                        windSpeed={windSpeed}
+                    />
+                </>
             );
 
         default:
