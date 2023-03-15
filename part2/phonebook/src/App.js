@@ -97,6 +97,7 @@ const App = () => {
                 entryService
                     .update(included_id, newEntry)
                     .then((returnedEntry) => {
+                        console.log(returnedEntry);
                         setPersons(
                             persons.map((person) =>
                                 person.id !== included_id
