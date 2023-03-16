@@ -113,25 +113,29 @@ const App = () => {
                         setNewNumber("");
                     })
                     .catch((error) => {
-                        displayMessage(
-                            `Information of ${newName} has already been removed from the server`,
-                            setErrorMessage
-                        );
+                        displayMessage(error.response.data, setErrorMessage);
                         setPersons(
                             persons.filter((person) => person.name !== newName)
                         );
                     });
             }
         } else {
-            entryService.create(newEntry).then((returnedEntry) => {
-                setPersons(persons.concat(returnedEntry));
-                displayMessage(
-                    `Added ${returnedEntry.name}`,
-                    setSuccessMessage
-                );
-                setNewName("");
-                setNewNumber("");
-            });
+            entryService
+                .create(newEntry)
+                .then((returnedEntry) => {
+                    setPersons(persons.concat(returnedEntry));
+                    displayMessage(
+                        `Added ${returnedEntry.name}`,
+                        setSuccessMessage
+                    );
+                    setNewName("");
+                    setNewNumber("");
+                })
+                .catch((error) => {
+                    //accessing the error message returned by the backend
+                    // default Mongoose ValidationError message
+                    displayMessage(error.response.data, setErrorMessage);
+                });
         }
     };
 
