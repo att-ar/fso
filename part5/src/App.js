@@ -1,23 +1,22 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+// import DOMPurify from "dompurify";
 
 import Blog from "./components/Blog";
 import LoginForm from "./components/LoginForm";
 import BlogForm from "./components/BlogForm";
 import Notification from "./components/Notification";
+import Togglable from "./components/Togglable";
 
 import blogService from "./services/blogs";
 import loginService from "./services/login";
 
 const App = () => {
     const [blogs, setBlogs] = useState([]);
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
     const [user, setUser] = useState(null);
-    const [newTitle, setNewTitle] = useState("");
-    const [newAuthor, setNewAuthor] = useState("");
-    const [newUrl, setNewUrl] = useState("");
     const [errorMessage, setErrorMessage] = useState(null);
     const [successMessage, setSuccessMessage] = useState(null);
+
+    const blogFormRef = useRef();
 
     useEffect(() => {
         const fetchBlogs = async () => {
@@ -43,24 +42,18 @@ const App = () => {
         }, 4000);
     };
 
-    const handleLogin = async (event) => {
-        event.preventDefault();
+    // passed to LoginForm
+    const loginUser = async (userObject) => {
         try {
-            const user = await loginService.login({
-                username,
-                password,
-            });
+            const user = await loginService.login(userObject);
             window.localStorage.setItem(
                 "loggedNoteappUser",
                 JSON.stringify(user)
             );
             blogService.setToken(user.token);
             setUser(user);
-            setUsername("");
-            setPassword("");
-        } catch (error) {
-            displayMessage(`Wrong username or password`, setErrorMessage);
-            setPassword("");
+        } catch (exception) {
+            displayMessage("wrong credentials", setErrorMessage);
         }
     };
 
@@ -71,38 +64,11 @@ const App = () => {
         window.localStorage.removeItem("loggedNoteappUser");
     };
 
-    const handleTitleChange = (event) => {
-        event.preventDefault();
-        const updatedTitle = event.target.value;
-        setNewTitle(updatedTitle);
-        console.log(updatedTitle);
-    };
-    const handleAuthorChange = (event) => {
-        event.preventDefault();
-        const updatedAuthor = event.target.value;
-        setNewAuthor(updatedAuthor);
-        console.log(updatedAuthor);
-    };
-    const handleUrlChange = (event) => {
-        event.preventDefault();
-        const updatedUrl = event.target.value;
-        setNewUrl(updatedUrl);
-        console.log(updatedUrl);
-    };
-
-    const addBlog = async (event) => {
-        event.preventDefault();
-        const blogObject = {
-            title: newTitle,
-            author: newAuthor,
-            url: newUrl,
-        };
+    // passed to BlogForm
+    const addBlog = async (blogObject) => {
+        blogFormRef.current.toggleVisibility();
         const returnedBlog = await blogService.create(blogObject);
         setBlogs(blogs.concat(returnedBlog));
-        setNewAuthor("");
-        setNewTitle("");
-        setNewUrl("");
-
         displayMessage(
             `A new blog '${returnedBlog.title}' by ${returnedBlog.author} was added`,
             setSuccessMessage
@@ -114,13 +80,9 @@ const App = () => {
             <div>
                 <Notification message={errorMessage} className="error" />
                 <h2>Log in to application</h2>
-                <LoginForm
-                    handleLogin={handleLogin}
-                    username={username}
-                    setUsername={setUsername}
-                    password={password}
-                    setPassword={setPassword}
-                />
+                <Togglable buttonLabel="log in">
+                    <LoginForm getUser={loginUser} />
+                </Togglable>
             </div>
         );
     }
@@ -153,15 +115,9 @@ const App = () => {
 
             <h2>create new</h2>
             <div>
-                <BlogForm
-                    addBlog={addBlog}
-                    newTitle={newTitle}
-                    newAuthor={newAuthor}
-                    newUrl={newUrl}
-                    handleTitleChange={handleTitleChange}
-                    handleAuthorChange={handleAuthorChange}
-                    handleUrlChange={handleUrlChange}
-                />
+                <Togglable buttonLabel="New Blog" ref={blogFormRef}>
+                    <BlogForm createBlog={addBlog} />
+                </Togglable>
             </div>
         </div>
     );
