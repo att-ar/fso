@@ -68,11 +68,37 @@ const App = () => {
     const addBlog = async (blogObject) => {
         blogFormRef.current.toggleVisibility();
         const returnedBlog = await blogService.create(blogObject);
-        setBlogs(blogs.concat(returnedBlog));
+        const completeBlog = await blogService.getOne(returnedBlog.id);
+        setBlogs(blogs.concat(completeBlog));
         displayMessage(
             `A new blog '${returnedBlog.title}' by ${returnedBlog.author} was added`,
             setSuccessMessage
         );
+    };
+
+    const handleLike = async (likedBlog) => {
+        await blogService.update(likedBlog.id, likedBlog);
+        const completeBlog = await blogService.getOne(likedBlog.id);
+        setBlogs(
+            blogs.map((blog) =>
+                blog.id !== completeBlog.id ? blog : completeBlog
+            )
+        );
+    };
+
+    const handleDelete = async (deletedBlog) => {
+        if (
+            window.confirm(
+                `Remove ${deletedBlog.title} by ${deletedBlog.author}?`
+            )
+        ) {
+            await blogService.remove(deletedBlog.id);
+            displayMessage(
+                `Deleted ${deletedBlog.title} by ${deletedBlog.author}`,
+                setSuccessMessage
+            );
+            setBlogs(blogs.filter((blog) => blog.id !== deletedBlog.id));
+        }
     };
 
     if (!user) {
@@ -94,25 +120,19 @@ const App = () => {
                 {user.name} logged in
                 <button onClick={handleLogout}>log out</button>
             </div>
-
-            <table>
-                <thead>
-                    <tr>
-                        <td>
-                            <u>Title</u>
-                        </td>
-                        <td>
-                            <u>Author</u>
-                        </td>
-                    </tr>
-                </thead>
-                <tbody>
-                    {blogs.map((blog) => (
-                        <Blog key={blog.id} blog={blog} />
+            <div>
+                {[...blogs]
+                    .sort((a, b) => b.likes - a.likes)
+                    .map((blog) => (
+                        <Blog
+                            key={blog.id}
+                            user={user}
+                            blog={blog}
+                            handleLike={handleLike}
+                            handleDelete={handleDelete}
+                        />
                     ))}
-                </tbody>
-            </table>
-
+            </div>
             <h2>create new</h2>
             <div>
                 <Togglable buttonLabel="New Blog" ref={blogFormRef}>
