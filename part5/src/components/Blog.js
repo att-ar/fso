@@ -1,8 +1,14 @@
 import { useState } from "react";
+import PropTypes from "prop-types";
 
 const ButtonBlog = ({ text, handleClick }) => {
     return <button onClick={handleClick}>{text}</button>;
 };
+ButtonBlog.propTypes = {
+    text: PropTypes.string.isRequired,
+    handleClick: PropTypes.func.isRequired,
+};
+ButtonBlog.displayName = "ButtonBlog";
 
 const Blog = ({ user, blog, handleLike, handleDelete }) => {
     const [toggleDetails, setToggleDetails] = useState(false);
@@ -34,7 +40,7 @@ const Blog = ({ user, blog, handleLike, handleDelete }) => {
         return (
             <div style={blogStyle}>
                 <div>
-                    '{blog.title}' by {blog.author}{" "}
+                    &apos;{blog.title}&apos; by {blog.author}{" "}
                     <ButtonBlog text={text} handleClick={handleToggle} />
                     <br></br>
                     url: {blog.url}
@@ -55,10 +61,18 @@ const Blog = ({ user, blog, handleLike, handleDelete }) => {
 
     return (
         <div style={blogStyle}>
-            '{blog.title}' by {blog.author}{" "}
+            &apos;{blog.title}&apos; by {blog.author}{" "}
             <ButtonBlog text={text} handleClick={handleToggle} />
         </div>
     );
 };
+
+Blog.propTypes = {
+    user: PropTypes.object.isRequired,
+    blog: PropTypes.object.isRequired,
+    handleLike: PropTypes.func.isRequired,
+    handleDelete: PropTypes.func.isRequired,
+};
+Blog.displayName = "Blog";
 
 export default Blog;
