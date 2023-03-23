@@ -69,6 +69,7 @@ const App = () => {
         blogFormRef.current.toggleVisibility();
         const returnedBlog = await blogService.create(blogObject);
         const completeBlog = await blogService.getOne(returnedBlog.id);
+        // completeBlog.user is populated with the data from the correct user
         setBlogs(blogs.concat(completeBlog));
         displayMessage(
             `A new blog '${returnedBlog.title}' by ${returnedBlog.author} was added`,
