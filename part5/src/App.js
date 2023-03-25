@@ -22,12 +22,13 @@ const App = () => {
         const fetchBlogs = async () => {
             const allBlogs = await blogService.getAll();
             setBlogs(allBlogs);
+            console.log(allBlogs);
         };
         fetchBlogs();
     }, []);
 
     useEffect(() => {
-        const loggedUserJSON = window.localStorage.getItem("loggedNoteappUser");
+        const loggedUserJSON = window.localStorage.getItem("loggedBlogappUser");
         if (loggedUserJSON) {
             const user = JSON.parse(loggedUserJSON);
             setUser(user);
@@ -47,7 +48,7 @@ const App = () => {
         try {
             const user = await loginService.login(userObject);
             window.localStorage.setItem(
-                "loggedNoteappUser",
+                "loggedBlogappUser",
                 JSON.stringify(user)
             );
             blogService.setToken(user.token);
@@ -61,7 +62,7 @@ const App = () => {
         event.preventDefault();
         blogService.setToken(null);
         setUser(null);
-        window.localStorage.removeItem("loggedNoteappUser");
+        window.localStorage.removeItem("loggedBlogappUser");
     };
 
     // passed to BlogForm
@@ -121,18 +122,21 @@ const App = () => {
                 {user.name} logged in
                 <button onClick={handleLogout}>log out</button>
             </div>
-            <div>
+            <div id="blogs">
                 {[...blogs]
                     .sort((a, b) => b.likes - a.likes)
-                    .map((blog) => (
-                        <Blog
-                            key={blog.id}
-                            user={user}
-                            blog={blog}
-                            handleLike={handleLike}
-                            handleDelete={handleDelete}
-                        />
-                    ))}
+                    .map((blog) => {
+                        console.log(blog);
+                        return (
+                            <Blog
+                                key={blog.id}
+                                user={user}
+                                blog={blog}
+                                handleLike={handleLike}
+                                handleDelete={handleDelete}
+                            />
+                        );
+                    })}
             </div>
             <h2>create new</h2>
             <div>

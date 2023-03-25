@@ -38,7 +38,7 @@ const Blog = ({ user, blog, handleLike, handleDelete }) => {
     };
     if (toggleDetails) {
         return (
-            <div style={blogStyle}>
+            <div style={blogStyle} className="blog">
                 <div>
                     &apos;{blog.title}&apos; by {blog.author}{" "}
                     <ButtonBlog text={text} handleClick={handleToggle} />
@@ -60,7 +60,7 @@ const Blog = ({ user, blog, handleLike, handleDelete }) => {
     }
 
     return (
-        <div style={blogStyle}>
+        <div style={blogStyle} className="blog">
             &apos;{blog.title}&apos; by {blog.author}{" "}
             <ButtonBlog text={text} handleClick={handleToggle} />
         </div>
