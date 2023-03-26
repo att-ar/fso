@@ -2,7 +2,10 @@ import { useSelector, useDispatch } from "react-redux";
 import { voteAnecdote } from "../reducers/anecdoteReducer";
 import { notify, unnotify } from "../reducers/notificationReducer";
 
+import anecdoteService from "../services/anecdotes";
+
 const Anecdote = ({ anecdote, handleVote }) => {
+    // console.log(anecdote.content);
     return (
         <div>
             <div>{anecdote.content}</div>
@@ -24,32 +27,33 @@ const AnecdoteList = () => {
             anecdote.content.toLowerCase().includes(filter.toLowerCase())
         );
     });
-    const notif = useSelector(({ notification }) => notification);
     const dispatch = useDispatch();
 
-    const vote = (id) => {
-        console.log("vote", id);
-        dispatch(voteAnecdote(id));
-        const anecdote = anecdotes.find((an) => an.id === id);
-        if (notif) {
-            //overwrite existing notif
-            dispatch(unnotify());
-        }
-        dispatch(notify(`You voted for '${anecdote.content}'`));
+    const vote = async (anecdote) => {
+        console.log("vote", anecdote.id);
+        const useAnecdote = { ...anecdote, votes: anecdote.votes + 1 };
+        const updatedAn = await anecdoteService.updateAnecdote(useAnecdote);
+
+        dispatch(voteAnecdote(updatedAn));
+
+        const message = `You voted for '${updatedAn.content}'`;
+        dispatch(notify(message));
         setTimeout(() => {
-            dispatch(unnotify());
+            dispatch(unnotify(message));
         }, 5000);
     };
     // the id is passed to vote inside Anecdote
     return (
         <>
-            {anecdotes.map((anecdote) => (
-                <Anecdote
-                    key={anecdote.id}
-                    anecdote={anecdote}
-                    handleVote={() => vote(anecdote.id)}
-                />
-            ))}
+            {[...anecdotes]
+                .sort((a, b) => b.votes - a.votes)
+                .map((anecdote) => (
+                    <Anecdote
+                        key={anecdote.id}
+                        anecdote={anecdote}
+                        handleVote={() => vote(anecdote)}
+                    />
+                ))}
         </>
     );
 };

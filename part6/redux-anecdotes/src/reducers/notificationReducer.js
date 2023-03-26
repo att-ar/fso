@@ -9,8 +9,12 @@ const notificationSlice = createSlice({
         notify(state, action) {
             return action.payload;
         },
+        //ignores unnotifies from overwritten notifs
         unnotify(state, action) {
-            return initialState;
+            if (state === action.payload) {
+                return initialState;
+            }
+            return state;
         },
     },
 });
