@@ -1,7 +1,9 @@
-import { useDispatch } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { createAnecdote } from "../reducers/anecdoteReducer";
+import { notify, unnotify } from "../reducers/notificationReducer";
 
 const AnecdoteForm = () => {
+    const notif = useSelector(({ notification }) => notification);
     const dispatch = useDispatch();
 
     const addAnecdote = (event) => {
@@ -10,6 +12,14 @@ const AnecdoteForm = () => {
         console.log("create", body);
         event.target.anecdote.value = "";
         dispatch(createAnecdote(body));
+        if (notif) {
+            //overwrite existing notif
+            dispatch(unnotify());
+        }
+        dispatch(notify(`You added '${body}'`));
+        setTimeout(() => {
+            dispatch(unnotify());
+        }, 5000);
     };
 
     return (
