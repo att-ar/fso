@@ -1,8 +1,6 @@
 import { useSelector, useDispatch } from "react-redux";
 import { voteAnecdote } from "../reducers/anecdoteReducer";
-import { notify, unnotify } from "../reducers/notificationReducer";
-
-import anecdoteService from "../services/anecdotes";
+import { setNotification } from "../reducers/notificationReducer";
 
 const Anecdote = ({ anecdote, handleVote }) => {
     // console.log(anecdote.content);
@@ -19,7 +17,7 @@ const Anecdote = ({ anecdote, handleVote }) => {
 
 const AnecdoteList = () => {
     //need to filter based on state.filter
-    const anecdotes = useSelector(({ anecdotes, filter, notification }) => {
+    const anecdotes = useSelector(({ anecdotes, filter }) => {
         if (filter === "") {
             return anecdotes;
         }
@@ -32,15 +30,10 @@ const AnecdoteList = () => {
     const vote = async (anecdote) => {
         console.log("vote", anecdote.id);
         const useAnecdote = { ...anecdote, votes: anecdote.votes + 1 };
-        const updatedAn = await anecdoteService.updateAnecdote(useAnecdote);
+        dispatch(voteAnecdote(useAnecdote));
 
-        dispatch(voteAnecdote(updatedAn));
-
-        const message = `You voted for '${updatedAn.content}'`;
-        dispatch(notify(message));
-        setTimeout(() => {
-            dispatch(unnotify(message));
-        }, 5000);
+        const message = `You voted for '${useAnecdote.content}'`;
+        dispatch(setNotification(message, 5));
     };
     // the id is passed to vote inside Anecdote
     return (
