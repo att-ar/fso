@@ -1,71 +1,97 @@
-import React, { useState, useEffect } from 'react'
-import axios from 'axios'
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 
 const useField = (type) => {
-  const [value, setValue] = useState('')
+    const [value, setValue] = useState("");
 
-  const onChange = (event) => {
-    setValue(event.target.value)
-  }
+    const onChange = (event) => {
+        setValue(event.target.value);
+    };
 
-  return {
-    type,
-    value,
-    onChange
-  }
-}
+    return {
+        type,
+        value,
+        onChange,
+    };
+};
 
 const useCountry = (name) => {
-  const [country, setCountry] = useState(null)
+    const [country, setCountry] = useState(null);
+    //name only gets changed when the form is submitted
+    // see the fetch event handler below
 
-  useEffect(() => {})
+    useEffect(() => {
+        console.log(name);
+        axios
+            .get(
+                `https://restcountries.com/v3.1/name/${name}?fields=name,capital,population,flags`
+            )
+            .then((res) => {
+                const data = res.data;
+                if (data.length === 1) {
+                    const useCountry = {
+                        ...data[0],
+                        name: data[0].name.common,
+                        capital: data[0].capital[0],
+                        flags: data[0].flags.svg,
+                        found: true,
+                    };
+                    setCountry(useCountry);
+                } else {
+                    setCountry({ found: false });
+                }
+            })
+            .catch((e) => {
+                setCountry(null);
+            });
+    }, [name]);
 
-  return country
-}
+    return country;
+};
 
 const Country = ({ country }) => {
-  if (!country) {
-    return null
-  }
+    if (!country) {
+        return null;
+    }
 
-  if (!country.found) {
+    if (!country.found) {
+        return <div>not found...</div>;
+    }
+
     return (
-      <div>
-        not found...
-      </div>
-    )
-  }
-
-  return (
-    <div>
-      <h3>{country.data.name} </h3>
-      <div>capital {country.data.capital} </div>
-      <div>population {country.data.population}</div> 
-      <img src={country.data.flag} height='100' alt={`flag of ${country.data.name}`}/>  
-    </div>
-  )
-}
+        <div>
+            <h3>{country.name} </h3>
+            <div>capital {country.capital} </div>
+            <div>population {country.population}</div>
+            <img
+                src={country.flags}
+                height="100"
+                alt={`flag of ${country.name}`}
+            />
+        </div>
+    );
+};
 
 const App = () => {
-  const nameInput = useField('text')
-  const [name, setName] = useState('')
-  const country = useCountry(name)
+    const nameInput = useField("text");
+    const [name, setName] = useState("");
+    const country = useCountry(name);
 
-  const fetch = (e) => {
-    e.preventDefault()
-    setName(nameInput.value)
-  }
+    const fetch = (e) => {
+        e.preventDefault();
+        setName(nameInput.value);
+    };
 
-  return (
-    <div>
-      <form onSubmit={fetch}>
-        <input {...nameInput} />
-        <button>find</button>
-      </form>
+    return (
+        <div>
+            <form onSubmit={fetch}>
+                <input {...nameInput} />
+                <button>find</button>
+            </form>
 
-      <Country country={country} />
-    </div>
-  )
-}
+            <Country country={country} />
+        </div>
+    );
+};
 
-export default App
+export default App;
