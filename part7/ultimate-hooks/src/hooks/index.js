@@ -8,14 +8,19 @@ export const useField = (type) => {
         setValue(event.target.value);
     };
 
+    const reset = () => {
+        setValue("");
+    };
+
     return {
         type,
         value,
         onChange,
+        reset,
     };
 };
 
-const generateId = () => Number(Math.random() * 10000);
+const generateId = () => Math.floor(Math.random() * 10000);
 
 export const useResource = (baseUrl) => {
     const [resources, setResources] = useState([]);
@@ -51,7 +56,7 @@ export const useResource = (baseUrl) => {
             .put(`${baseUrl}/${resource.id}`, resource)
             .then((res) =>
                 setResources(
-                    resources.map((r) => (r.id !== resource.id ? r : res.data))
+                    resources.map((r) => (r.id !== resource.id ? r : resource))
                 )
             )
             .catch((e) => e.data.message);
