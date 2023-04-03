@@ -10,12 +10,14 @@ import Togglable from "./components/Togglable";
 import blogService from "./services/blogs";
 import loginService from "./services/login";
 
+import { useDispatch } from "react-redux";
+import { setNotification } from "./reducers/notificationReducer";
+
 const App = () => {
     const [blogs, setBlogs] = useState([]);
     const [user, setUser] = useState(null);
-    const [errorMessage, setErrorMessage] = useState(null);
-    const [successMessage, setSuccessMessage] = useState(null);
 
+    const dispatch = useDispatch();
     const blogFormRef = useRef();
 
     useEffect(() => {
@@ -36,13 +38,6 @@ const App = () => {
         }
     }, []);
 
-    const displayMessage = (message, setter) => {
-        setter(message);
-        setTimeout(() => {
-            setter(null);
-        }, 4000);
-    };
-
     // passed to LoginForm
     const loginUser = async (userObject) => {
         try {
@@ -54,7 +49,7 @@ const App = () => {
             blogService.setToken(user.token);
             setUser(user);
         } catch (exception) {
-            displayMessage("wrong credentials", setErrorMessage);
+            dispatch(setNotification("wrong credentials", 4));
         }
     };
 
@@ -72,9 +67,11 @@ const App = () => {
         const completeBlog = await blogService.getOne(returnedBlog.id);
         // completeBlog.user is populated with the data from the correct user
         setBlogs(blogs.concat(completeBlog));
-        displayMessage(
-            `A new blog '${returnedBlog.title}' by ${returnedBlog.author} was added`,
-            setSuccessMessage
+        dispatch(
+            setNotification(
+                `A new blog '${returnedBlog.title}' by ${returnedBlog.author} was added`,
+                4
+            )
         );
     };
 
@@ -86,6 +83,7 @@ const App = () => {
                 blog.id !== completeBlog.id ? blog : completeBlog
             )
         );
+        dispatch(setNotification(`Liked ${likedBlog.title}`, 2));
     };
 
     const handleDelete = async (deletedBlog) => {
@@ -95,9 +93,11 @@ const App = () => {
             )
         ) {
             await blogService.remove(deletedBlog.id);
-            displayMessage(
-                `Deleted ${deletedBlog.title} by ${deletedBlog.author}`,
-                setSuccessMessage
+            dispatch(
+                setNotification(
+                    `Deleted ${deletedBlog.title} by ${deletedBlog.author}`,
+                    4
+                )
             );
             setBlogs(blogs.filter((blog) => blog.id !== deletedBlog.id));
         }
@@ -106,7 +106,7 @@ const App = () => {
     if (!user) {
         return (
             <div>
-                <Notification message={errorMessage} className="error" />
+                <Notification className="error" />
                 <h2>Log in to application</h2>
                 <Togglable buttonLabel="log in">
                     <LoginForm getUser={loginUser} />
@@ -117,7 +117,7 @@ const App = () => {
     return (
         <div>
             <h2>blogs</h2>
-            <Notification message={successMessage} className="success" />
+            <Notification className="success" />
             <div>
                 {user.name} logged in
                 <button onClick={handleLogout}>log out</button>
@@ -126,7 +126,6 @@ const App = () => {
                 {[...blogs]
                     .sort((a, b) => b.likes - a.likes)
                     .map((blog) => {
-                        console.log(blog);
                         return (
                             <Blog
                                 key={blog.id}
