@@ -1,5 +1,10 @@
 import { useState } from "react";
+import { useDispatch } from "react-redux";
+
 import PropTypes from "prop-types";
+
+import { likeBlog, deleteBlog } from "../reducers/blogReducer";
+import { setNotification } from "../reducers/notificationReducer";
 
 const ButtonBlog = ({ text, handleClick }) => {
     return <button onClick={handleClick}>{text}</button>;
@@ -10,8 +15,9 @@ ButtonBlog.propTypes = {
 };
 ButtonBlog.displayName = "ButtonBlog";
 
-const Blog = ({ user, blog, handleLike, handleDelete }) => {
+const Blog = ({ user, blog }) => {
     const [toggleDetails, setToggleDetails] = useState(false);
+
     const blogStyle = {
         paddingTop: 10,
         paddingLeft: 2,
@@ -20,22 +26,29 @@ const Blog = ({ user, blog, handleLike, handleDelete }) => {
         marginBottom: 5,
     };
 
+    const dispatch = useDispatch();
+
     const handleToggle = () => {
         setToggleDetails(!toggleDetails);
     };
+
     const text = toggleDetails ? "hide" : "show";
 
-    const likeBlog = () => {
+    const handleLike = async () => {
         const likedBlog = {
             ...blog,
             user: blog.user.id,
             likes: blog.likes + 1,
         };
-        handleLike(likedBlog);
+        dispatch(likeBlog(blog.id, likedBlog));
+        dispatch(setNotification(`Liked ${blog.title}`, 2, "success"));
     };
-    const deleteBlog = () => {
-        handleDelete(blog);
+
+    const handleDelete = async () => {
+        dispatch(deleteBlog(blog.id));
+        dispatch(setNotification(`Delete ${blog.title}`, 4, "success"));
     };
+
     if (toggleDetails) {
         return (
             <div style={blogStyle} className="blog">
@@ -46,13 +59,13 @@ const Blog = ({ user, blog, handleLike, handleDelete }) => {
                     url: {blog.url}
                     <br></br>
                     likes: {blog.likes}
-                    <ButtonBlog text="like" handleClick={likeBlog} />
+                    <ButtonBlog text="like" handleClick={handleLike} />
                     <br></br>
                     user: {blog.user.name}
                 </div>
                 {user.username === blog.user.username ? (
                     <div>
-                        <ButtonBlog text="remove" handleClick={deleteBlog} />
+                        <ButtonBlog text="remove" handleClick={handleDelete} />
                     </div>
                 ) : null}
             </div>
@@ -70,8 +83,6 @@ const Blog = ({ user, blog, handleLike, handleDelete }) => {
 Blog.propTypes = {
     user: PropTypes.object.isRequired,
     blog: PropTypes.object.isRequired,
-    handleLike: PropTypes.func.isRequired,
-    handleDelete: PropTypes.func.isRequired,
 };
 Blog.displayName = "Blog";
 

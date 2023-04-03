@@ -1,67 +1,58 @@
-import { useState } from "react";
+import { useDispatch } from "react-redux";
 
-import PropTypes from "prop-types";
+import { useField } from "../hooks";
 
-const BlogForm = ({ createBlog }) => {
-    const [title, setTitle] = useState("");
-    const [author, setAuthor] = useState("");
-    const [url, setUrl] = useState("");
+import { createBlog } from "../reducers/blogReducer";
 
-    const addBlog = (event) => {
+const BlogForm = ({ toggle }) => {
+    const { reset: resetTitle, ...title } = useField("text", "title");
+    const { reset: resetAuthor, ...author } = useField("text", "author");
+    const { reset: resetUrl, ...url } = useField("text", "url");
+
+    const dispatch = useDispatch();
+
+    const addBlog = async (event) => {
         event.preventDefault();
 
-        createBlog({ title, author, url });
+        dispatch(
+            createBlog({
+                title: title.value,
+                author: author.value,
+                url: url.value,
+            })
+        );
 
-        setTitle("");
-        setAuthor("");
-        setUrl("");
+        resetTitle();
+        resetAuthor();
+        resetUrl();
+        toggle(title.value, author.value);
     };
 
     return (
         <form onSubmit={addBlog}>
             <p>
-                title:{" "}
-                <input
-                    id="title"
-                    value={title}
-                    onChange={({ target: { value } }) => {
-                        setTitle(value);
-                    }}
-                    placeholder="title"
-                />
+                title: <input id="title" {...title} />
                 <br></br>
-                author:{" "}
-                <input
-                    id="author"
-                    value={author}
-                    onChange={({ target: { value } }) => {
-                        setAuthor(value);
-                    }}
-                    placeholder="author"
-                />
+                author: <input id="author" {...author} />
                 <br></br>
-                url:{" "}
-                <input
-                    id="url"
-                    value={url}
-                    onChange={({ target: { value } }) => {
-                        setUrl(value);
-                    }}
-                    placeholder="url"
-                />
+                url: <input id="url" {...url} />
                 <br></br>
             </p>
             <button id="submit-blog" type="submit">
                 create
             </button>
+            <button
+                id="clear-blog"
+                type="button"
+                onClick={() => {
+                    resetTitle();
+                    resetAuthor();
+                    resetUrl();
+                }}>
+                reset
+            </button>
         </form>
     );
 };
-
-BlogForm.propTypes = {
-    createBlog: PropTypes.func.isRequired,
-};
-
-BlogForm.displayName = "BlogForm";
 
 export default BlogForm;

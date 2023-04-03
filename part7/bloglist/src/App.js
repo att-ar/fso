@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-// import DOMPurify from "dompurify";
 
-import Blog from "./components/Blog";
+import BlogList from "./components/BlogList";
 import LoginForm from "./components/LoginForm";
 import BlogForm from "./components/BlogForm";
 import Notification from "./components/Notification";
@@ -12,22 +11,19 @@ import loginService from "./services/login";
 
 import { useDispatch } from "react-redux";
 import { setNotification } from "./reducers/notificationReducer";
+import { initializeBlogs } from "./reducers/blogReducer";
 
 const App = () => {
-    const [blogs, setBlogs] = useState([]);
     const [user, setUser] = useState(null);
 
     const dispatch = useDispatch();
     const blogFormRef = useRef();
 
+    //initializes the blogs so that other components can use
+    // the useSelector() function to access state.blogs with the right blogs
     useEffect(() => {
-        const fetchBlogs = async () => {
-            const allBlogs = await blogService.getAll();
-            setBlogs(allBlogs);
-            console.log(allBlogs);
-        };
-        fetchBlogs();
-    }, []);
+        dispatch(initializeBlogs());
+    }, [dispatch]);
 
     useEffect(() => {
         const loggedUserJSON = window.localStorage.getItem("loggedBlogappUser");
@@ -49,7 +45,7 @@ const App = () => {
             blogService.setToken(user.token);
             setUser(user);
         } catch (exception) {
-            dispatch(setNotification("wrong credentials", 4));
+            dispatch(setNotification("wrong credentials", 4, "error"));
         }
     };
 
@@ -61,52 +57,22 @@ const App = () => {
     };
 
     // passed to BlogForm
-    const addBlog = async (blogObject) => {
+    const addBlog = (title, author) => {
+        //toggles the visiblity of the blog form and sets a notif
         blogFormRef.current.toggleVisibility();
-        const returnedBlog = await blogService.create(blogObject);
-        const completeBlog = await blogService.getOne(returnedBlog.id);
-        // completeBlog.user is populated with the data from the correct user
-        setBlogs(blogs.concat(completeBlog));
         dispatch(
             setNotification(
-                `A new blog '${returnedBlog.title}' by ${returnedBlog.author} was added`,
-                4
+                `A new blog '${title}' by ${author} was added`,
+                4,
+                "success"
             )
         );
-    };
-
-    const handleLike = async (likedBlog) => {
-        await blogService.update(likedBlog.id, likedBlog);
-        const completeBlog = await blogService.getOne(likedBlog.id);
-        setBlogs(
-            blogs.map((blog) =>
-                blog.id !== completeBlog.id ? blog : completeBlog
-            )
-        );
-        dispatch(setNotification(`Liked ${likedBlog.title}`, 2));
-    };
-
-    const handleDelete = async (deletedBlog) => {
-        if (
-            window.confirm(
-                `Remove ${deletedBlog.title} by ${deletedBlog.author}?`
-            )
-        ) {
-            await blogService.remove(deletedBlog.id);
-            dispatch(
-                setNotification(
-                    `Deleted ${deletedBlog.title} by ${deletedBlog.author}`,
-                    4
-                )
-            );
-            setBlogs(blogs.filter((blog) => blog.id !== deletedBlog.id));
-        }
     };
 
     if (!user) {
         return (
             <div>
-                <Notification className="error" />
+                <Notification />
                 <h2>Log in to application</h2>
                 <Togglable buttonLabel="log in">
                     <LoginForm getUser={loginUser} />
@@ -117,30 +83,16 @@ const App = () => {
     return (
         <div>
             <h2>blogs</h2>
-            <Notification className="success" />
+            <Notification />
             <div>
                 {user.name} logged in
                 <button onClick={handleLogout}>log out</button>
             </div>
-            <div id="blogs">
-                {[...blogs]
-                    .sort((a, b) => b.likes - a.likes)
-                    .map((blog) => {
-                        return (
-                            <Blog
-                                key={blog.id}
-                                user={user}
-                                blog={blog}
-                                handleLike={handleLike}
-                                handleDelete={handleDelete}
-                            />
-                        );
-                    })}
-            </div>
+            <BlogList user={user} />
             <h2>create new</h2>
             <div>
                 <Togglable buttonLabel="New Blog" ref={blogFormRef}>
-                    <BlogForm createBlog={addBlog} />
+                    <BlogForm toggle={addBlog} />
                 </Togglable>
             </div>
         </div>

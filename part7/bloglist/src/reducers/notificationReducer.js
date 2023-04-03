@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-const initialState = "";
+const initialState = { message: "", status: "" };
 
 const notificationSlice = createSlice({
     name: "notification",
@@ -12,7 +12,9 @@ const notificationSlice = createSlice({
         },
         //ignores unnotifies from overwritten notifs
         unnotify(state, action) {
-            if (state === action.payload) {
+            console.log(JSON.parse(JSON.stringify(state)));
+            console.log(action.payload);
+            if (state.message === action.payload) {
                 return initialState;
             }
             return state;
@@ -22,9 +24,9 @@ const notificationSlice = createSlice({
 
 export const { notify, unnotify } = notificationSlice.actions;
 
-export const setNotification = (message, timeout) => {
+export const setNotification = (message, timeout, status) => {
     return async (dispatch) => {
-        dispatch(notify(message));
+        dispatch(notify({ message, status }));
         setTimeout(() => {
             dispatch(unnotify(message));
         }, timeout * 1000);
