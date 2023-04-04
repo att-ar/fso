@@ -5,6 +5,10 @@
 /.pnp
 .pnp.js
 
+# /src
+/src-redux
+# /src-react-query
+
 # testing
 /coverage
 
