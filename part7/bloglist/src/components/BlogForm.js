@@ -3,6 +3,7 @@ import { useDispatch } from "react-redux";
 import { useField } from "../hooks";
 
 import { createBlog } from "../reducers/blogReducer";
+import { setNotification } from "../reducers/notificationReducer";
 
 const BlogForm = ({ toggle }) => {
     const { reset: resetTitle, ...title } = useField("text", "title");
@@ -25,7 +26,14 @@ const BlogForm = ({ toggle }) => {
         resetTitle();
         resetAuthor();
         resetUrl();
-        toggle(title.value, author.value);
+        toggle();
+        dispatch(
+            setNotification(
+                `A new blog '${title.value}' by ${author.value} was added`,
+                4,
+                "success"
+            )
+        );
     };
 
     return (

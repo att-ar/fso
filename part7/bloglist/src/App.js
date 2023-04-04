@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 
 import BlogList from "./components/BlogList";
 import LoginForm from "./components/LoginForm";
@@ -6,67 +6,34 @@ import BlogForm from "./components/BlogForm";
 import Notification from "./components/Notification";
 import Togglable from "./components/Togglable";
 
-import blogService from "./services/blogs";
-import loginService from "./services/login";
-
-import { useDispatch } from "react-redux";
-import { setNotification } from "./reducers/notificationReducer";
+import { useDispatch, useSelector } from "react-redux";
 import { initializeBlogs } from "./reducers/blogReducer";
+import { initializeUser, logoutUser } from "./reducers/loginReducer";
+import { setNotification } from "./reducers/notificationReducer";
 
 const App = () => {
-    const [user, setUser] = useState(null);
+    const user = useSelector((state) => state.user);
 
     const dispatch = useDispatch();
     const blogFormRef = useRef();
 
-    //initializes the blogs so that other components can use
-    // the useSelector() function to access state.blogs with the right blogs
+    //initializes the blogs and the user so that other components can use
+    // the useSelector() function to access the state in the store
     useEffect(() => {
         dispatch(initializeBlogs());
+        dispatch(initializeUser());
     }, [dispatch]);
-
-    useEffect(() => {
-        const loggedUserJSON = window.localStorage.getItem("loggedBlogappUser");
-        if (loggedUserJSON) {
-            const user = JSON.parse(loggedUserJSON);
-            setUser(user);
-            blogService.setToken(user.token);
-        }
-    }, []);
-
-    // passed to LoginForm
-    const loginUser = async (userObject) => {
-        try {
-            const user = await loginService.login(userObject);
-            window.localStorage.setItem(
-                "loggedBlogappUser",
-                JSON.stringify(user)
-            );
-            blogService.setToken(user.token);
-            setUser(user);
-        } catch (exception) {
-            dispatch(setNotification("wrong credentials", 4, "error"));
-        }
-    };
 
     const handleLogout = (event) => {
         event.preventDefault();
-        blogService.setToken(null);
-        setUser(null);
-        window.localStorage.removeItem("loggedBlogappUser");
+        dispatch(logoutUser());
+        dispatch(setNotification("Logged out successfully", 3, "success"));
     };
 
     // passed to BlogForm
-    const addBlog = (title, author) => {
+    const addBlog = () => {
         //toggles the visiblity of the blog form and sets a notif
         blogFormRef.current.toggleVisibility();
-        dispatch(
-            setNotification(
-                `A new blog '${title}' by ${author} was added`,
-                4,
-                "success"
-            )
-        );
     };
 
     if (!user) {
@@ -75,7 +42,7 @@ const App = () => {
                 <Notification />
                 <h2>Log in to application</h2>
                 <Togglable buttonLabel="log in">
-                    <LoginForm getUser={loginUser} />
+                    <LoginForm />
                 </Togglable>
             </div>
         );
@@ -86,7 +53,7 @@ const App = () => {
             <Notification />
             <div>
                 {user.name} logged in
-                <button onClick={handleLogout}>log out</button>
+                <button onClick={handleLogout}> log out</button>
             </div>
             <BlogList user={user} />
             <h2>create new</h2>

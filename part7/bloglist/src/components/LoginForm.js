@@ -1,15 +1,33 @@
-import { useState } from "react";
-import PropTypes from "prop-types";
+// import { useState } from "react";
+import { useDispatch } from "react-redux";
+import { useField } from "../hooks";
 
-const LoginForm = ({ getUser }) => {
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
+import { setNotification } from "../reducers/notificationReducer";
+import { loginUser } from "../reducers/loginReducer";
+
+const LoginForm = () => {
+    const { reset: resetUsername, ...username } = useField("text", "username");
+    const { reset: resetPassword, ...password } = useField(
+        "password",
+        "password"
+    );
+
+    const dispatch = useDispatch();
 
     const handleLogin = (event) => {
         event.preventDefault();
-        getUser({ username, password });
-        setUsername("");
-        setPassword("");
+        try {
+            dispatch(
+                loginUser({
+                    username: username.value,
+                    password: password.value,
+                })
+            );
+        } catch (exception) {
+            dispatch(setNotification("wrong credentials", 4, "error"));
+        }
+        resetPassword();
+        resetUsername();
     };
 
     return (
@@ -19,31 +37,27 @@ const LoginForm = ({ getUser }) => {
             <form onSubmit={handleLogin}>
                 <div>
                     username
-                    <input
-                        id="username"
-                        value={username}
-                        onChange={({ target: { value } }) => setUsername(value)}
-                    />
+                    <input id="username" {...username} />
                 </div>
                 <div>
                     password
-                    <input
-                        id="password"
-                        type="password"
-                        value={password}
-                        onChange={({ target: { value } }) => setPassword(value)}
-                    />
+                    <input id="password" {...password} />
                 </div>
                 <button id="login-button" type="submit">
                     login
                 </button>
+                <button
+                    id="clear-login"
+                    type="button"
+                    onClick={() => {
+                        resetPassword();
+                        resetUsername();
+                    }}>
+                    clear
+                </button>
             </form>
         </div>
     );
-};
-
-LoginForm.propTypes = {
-    getUser: PropTypes.func.isRequired,
 };
 
 LoginForm.displayName = "LoginForm";
