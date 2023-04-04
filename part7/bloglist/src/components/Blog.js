@@ -45,8 +45,10 @@ const Blog = ({ user, blog }) => {
     };
 
     const handleDelete = async () => {
-        dispatch(deleteBlog(blog.id));
-        dispatch(setNotification(`Delete ${blog.title}`, 4, "success"));
+        if (window.confirm(`Remove ${blog.title} by ${blog.author}?`)) {
+            dispatch(deleteBlog(blog.id));
+            dispatch(setNotification(`Delete ${blog.title}`, 4, "success"));
+        }
     };
 
     if (toggleDetails) {
