@@ -1,10 +1,10 @@
-import PropTypes from "prop-types";
 import { useSelector } from "react-redux";
 import Blog from "./Blog";
 
-const BlogList = ({ user }) => {
+const BlogList = () => {
     const blogs = useSelector((state) => state.blogs);
-
+    const user = useSelector((state) => state.user);
+    console.log(blogs);
     return (
         <div id="blogs">
             {[...blogs]
@@ -16,9 +16,6 @@ const BlogList = ({ user }) => {
     );
 };
 
-BlogList.propTypes = {
-    user: PropTypes.object.isRequired,
-};
 BlogList.displayName = "BlogList";
 
 export default BlogList;

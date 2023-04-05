@@ -7,13 +7,10 @@ const notificationSlice = createSlice({
     initialState,
     reducers: {
         notify(state, action) {
-            console.log(action.payload);
             return action.payload;
         },
         //ignores unnotifies from overwritten notifs
         unnotify(state, action) {
-            console.log(JSON.parse(JSON.stringify(state)));
-            console.log(action.payload);
             if (state.message === action.payload) {
                 return initialState;
             }

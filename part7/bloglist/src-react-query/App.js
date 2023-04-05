@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from "react";
-// import DOMPurify from "dompurify";
+import { useEffect, useRef } from "react";
+import { useQuery } from "react-query";
 
 import Blog from "./components/Blog";
 import LoginForm from "./components/LoginForm";
@@ -7,36 +7,46 @@ import BlogForm from "./components/BlogForm";
 import Notification from "./components/Notification";
 import Togglable from "./components/Togglable";
 
-import blogService from "./services/blogs";
-import loginService from "./services/login";
-
-import { useNotifDispatch } from "./NotificationContext";
+import { useNotifDispatch } from "./contexts/NotificationContext";
+import { useUserDispatch, useUserValue } from "./contexts/UserContext";
+import blogRequest, { getBlogs } from "./requests/blogRequest";
 
 const App = () => {
-    const [blogs, setBlogs] = useState([]);
-    const [user, setUser] = useState(null);
-
+    const userDispatch = useUserDispatch();
+    const user = useUserValue();
     const blogFormRef = useRef();
-
-    useEffect(() => {
-        const fetchBlogs = async () => {
-            const allBlogs = await blogService.getAll();
-            setBlogs(allBlogs);
-        };
-        fetchBlogs();
-    }, []);
 
     useEffect(() => {
         const loggedUserJSON = window.localStorage.getItem("loggedBlogappUser");
         if (loggedUserJSON) {
             const user = JSON.parse(loggedUserJSON);
-            setUser(user);
-            blogService.setToken(user.token);
+            userDispatch({ type: "SET", payload: user });
+            blogRequest.setToken(user.token);
         }
     }, []);
 
-    const notifDispatch = useNotifDispatch();
+    const handleLogout = (event) => {
+        event.preventDefault();
+        blogRequest.setToken(null);
+        userDispatch({ type: "REMOVE" });
+        window.localStorage.removeItem("loggedBlogappUser");
+        displayMessage("SUCCESS", "Logged out");
+    };
 
+    const result = useQuery("blogs", getBlogs, {
+        refetchOnWindowFocus: false,
+        retry: 1,
+    });
+    if (result.isLoading) {
+        return <div>loading data...</div>;
+    }
+    if (result.isError) {
+        return <div>blog service not available due to problems in server</div>;
+    }
+    //at this point the result is in success state
+    const blogs = result.data;
+
+    const notifDispatch = useNotifDispatch();
     const displayMessage = (type, payload) => {
         notifDispatch({ type, payload });
         setTimeout(() => {
@@ -44,67 +54,9 @@ const App = () => {
         }, 4000);
     };
 
-    // passed to LoginForm
-    const loginUser = async (userObject) => {
-        try {
-            const user = await loginService.login(userObject);
-            window.localStorage.setItem(
-                "loggedBlogappUser",
-                JSON.stringify(user)
-            );
-            blogService.setToken(user.token);
-            setUser(user);
-            displayMessage("SUCCESS", "Logged in");
-        } catch (exception) {
-            displayMessage("ERROR", "wrong credentials");
-        }
-    };
-
-    const handleLogout = (event) => {
-        event.preventDefault();
-        blogService.setToken(null);
-        setUser(null);
-        window.localStorage.removeItem("loggedBlogappUser");
-        displayMessage("SUCCESS", "Logged out");
-    };
-
     // passed to BlogForm
-    const addBlog = async (blogObject) => {
+    const toggleBlogForm = () => {
         blogFormRef.current.toggleVisibility();
-        const returnedBlog = await blogService.create(blogObject);
-        const completeBlog = await blogService.getOne(returnedBlog.id);
-        // completeBlog.user is populated with the data from the correct user
-        setBlogs(blogs.concat(completeBlog));
-        displayMessage(
-            "SUCCESS",
-            `A new blog '${returnedBlog.title}' by ${returnedBlog.author} was added`
-        );
-    };
-
-    const handleLike = async (likedBlog) => {
-        await blogService.update(likedBlog.id, likedBlog);
-        const completeBlog = await blogService.getOne(likedBlog.id);
-        setBlogs(
-            blogs.map((blog) =>
-                blog.id !== completeBlog.id ? blog : completeBlog
-            )
-        );
-        displayMessage("SUCCESS", `Liked ${completeBlog.title}`);
-    };
-
-    const handleDelete = async (deletedBlog) => {
-        if (
-            window.confirm(
-                `Remove ${deletedBlog.title} by ${deletedBlog.author}?`
-            )
-        ) {
-            await blogService.remove(deletedBlog.id);
-            displayMessage(
-                "SUCCESS",
-                `Deleted ${deletedBlog.title} by ${deletedBlog.author}`
-            );
-            setBlogs(blogs.filter((blog) => blog.id !== deletedBlog.id));
-        }
     };
 
     if (!user) {
@@ -113,7 +65,7 @@ const App = () => {
                 <Notification />
                 <h2>Log in to application</h2>
                 <Togglable buttonLabel="log in">
-                    <LoginForm getUser={loginUser} />
+                    <LoginForm displayMessage={displayMessage} />
                 </Togglable>
             </div>
         );
@@ -135,8 +87,7 @@ const App = () => {
                                 key={blog.id}
                                 user={user}
                                 blog={blog}
-                                handleLike={handleLike}
-                                handleDelete={handleDelete}
+                                displayMessage={displayMessage}
                             />
                         );
                     })}
@@ -144,7 +95,11 @@ const App = () => {
             <h2>create new</h2>
             <div>
                 <Togglable buttonLabel="New Blog" ref={blogFormRef}>
-                    <BlogForm createBlog={addBlog} />
+                    <BlogForm
+                        toggleForm={toggleBlogForm}
+                        user={user}
+                        displayMessage={displayMessage}
+                    />
                 </Togglable>
             </div>
         </div>
