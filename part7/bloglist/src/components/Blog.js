@@ -1,6 +1,7 @@
 import { useDispatch } from "react-redux";
-
 import PropTypes from "prop-types";
+
+import CommentForm from "./CommentForm";
 
 import { likeBlog, deleteBlog } from "../reducers/blogReducer";
 import { setNotification } from "../reducers/notificationReducer";
@@ -52,6 +53,13 @@ const Blog = ({ user, blog }) => {
                         <ButtonBlog text="remove" handleClick={handleDelete} />
                     </div>
                 ) : null}
+                <h3>Comments</h3>
+                <CommentForm id={blog.id} />
+                <ul>
+                    {blog.comments.map((c, idx) => (
+                        <li key={idx}>{c}</li>
+                    ))}
+                </ul>
             </div>
         );
     }

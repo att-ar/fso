@@ -8,7 +8,6 @@ const blogSlice = createSlice({
     reducers: {
         updateBlog(state, action) {
             const updateBlog = action.payload;
-            console.log(updateBlog);
             return state.map((blog) =>
                 blog.id !== updateBlog.id ? blog : updateBlog
             );
@@ -59,8 +58,15 @@ export const deleteBlog = (id) => {
 
 export const likeBlog = (id, blog) => {
     return async (dispatch) => {
-        console.log(blog);
         await blogService.update(id, blog);
+        const populatedBlog = await blogService.getOne(id);
+        dispatch(updateBlog(populatedBlog));
+    };
+};
+
+export const commentBlog = (id, comment) => {
+    return async (dispatch) => {
+        await blogService.comment(id, comment);
         const populatedBlog = await blogService.getOne(id);
         dispatch(updateBlog(populatedBlog));
     };

@@ -5,7 +5,6 @@ import { Link } from "react-router-dom";
 const UserList = () => {
     const users = useSelector((state) => state.users);
 
-    console.log(users);
     if (users) {
         return (
             <div>

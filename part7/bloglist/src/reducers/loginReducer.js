@@ -31,7 +31,6 @@ export const initializeUser = (windowItem = "loggedBlogappUser") => {
 export const loginUser = (userObject, windowItem = "loggedBlogappUser") => {
     return async (dispatch) => {
         const user = await loginService.login(userObject);
-        console.log(user);
         window.localStorage.setItem(windowItem, JSON.stringify(user));
         blogService.setToken(user.token);
         dispatch(setUser(user));
