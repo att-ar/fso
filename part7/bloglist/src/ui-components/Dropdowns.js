@@ -28,10 +28,14 @@ const makeOptions = (user, handleLogout) => [
 
 export const ProfileDropdown = ({ user, handleLogout }) => {
     const options = makeOptions(user, handleLogout);
+    const space = user.name.indexOf(" ");
+    const firstName = space !== -1 ? user.name.slice(0, space) : user.name;
     return (
         <Dropdown
+            style={{ padding: 6 }}
             icon="user circle"
-            trigger={<Trigger name={user.name} />}
+            direction="left"
+            trigger={<Trigger name={firstName} />}
             options={options}
         />
     );
