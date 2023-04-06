@@ -15,6 +15,7 @@ import { initializeBlogs } from "./reducers/blogReducer";
 import { initializeUser, logoutUser } from "./reducers/loginReducer";
 import { initializeUsers } from "./reducers/usersReducer";
 import { setNotification } from "./reducers/notificationReducer";
+import { ProfileDropdown } from "./ui-components/Dropdowns";
 
 const Menu = () => {
     return (
@@ -57,15 +58,20 @@ const App = () => {
         blogFormRef.current.toggleVisibility();
     };
 
-    const byId = (id, data) => data.find((b) => b.id === id);
+    const byField = (field, filter, data) =>
+        data.find((b) => b[field] === filter);
 
     const blogMatch = useMatch("/blogs/:id");
-    const matchedBlog = blogMatch ? byId(blogMatch.params.id, blogs) : null;
+    const matchedBlog = blogMatch
+        ? byField("id", blogMatch.params.id, blogs)
+        : null;
 
     const userMatch = useMatch("/users/:id");
-    const matchedUser = userMatch ? byId(userMatch.params.id, users) : null;
+    const matchedUser = userMatch
+        ? byField("id", userMatch.params.id, users)
+        : null;
 
-    if (!user) {
+    if (!user || users.length === 0) {
         return (
             <div className="page">
                 <Notification />
@@ -75,52 +81,58 @@ const App = () => {
                 </Togglable>
             </div>
         );
-    }
-    return (
-        <div className="page">
-            <div className="menu">
-                <Menu />
-                <span
-                    style={{
-                        position: "absolute",
-                        color: "white",
-                        fontSize: 18,
-                        right: 10,
-                    }}>
-                    {user.name + " logged in "}
-                    <button onClick={handleLogout}>log out</button>
-                </span>
-            </div>
-            <div style={{ padding: "5 0 5 0" }}>
-                <h2 style={{ color: "rgb(120, 107, 95)" }}>Blog App</h2>
-                <Notification />
-            </div>
-            <Routes>
-                <Route
-                    path="/"
-                    element={
-                        <div>
-                            <BlogList user={user} />
-                            <h2>Create New</h2>
+    } else {
+        const active = users.find((u) => u.username === user.username);
+        return (
+            <div className="page">
+                <div className="menu">
+                    <Menu />
+                    <span
+                        style={{
+                            position: "absolute",
+                            color: "white",
+                            fontSize: 18,
+                            right: 10,
+                        }}>
+                        <ProfileDropdown
+                            user={active}
+                            handleLogout={handleLogout}
+                        />
+                    </span>
+                </div>
+                <div style={{ padding: "5 0 5 0" }}>
+                    <h2 style={{ color: "rgb(120, 107, 95)" }}>Blog App</h2>
+                    <Notification />
+                </div>
+                <Routes>
+                    <Route
+                        path="/"
+                        element={
                             <div>
-                                <Togglable
-                                    buttonLabel="New Blog"
-                                    ref={blogFormRef}>
-                                    <BlogForm toggle={addBlog} />
-                                </Togglable>
+                                <BlogList user={user} />
+                                <h2>Create New</h2>
+                                <div>
+                                    <Togglable
+                                        buttonLabel="New Blog"
+                                        ref={blogFormRef}>
+                                        <BlogForm toggle={addBlog} />
+                                    </Togglable>
+                                </div>
                             </div>
-                        </div>
-                    }></Route>
-                <Route
-                    path="/blogs/:id"
-                    element={<Blog user={user} blog={matchedBlog} />}></Route>
-                <Route
-                    path="/users/:id"
-                    element={<User user={matchedUser} />}></Route>
-                <Route path="/users" element={<UserList />}></Route>
-            </Routes>
-        </div>
-    );
+                        }></Route>
+                    <Route
+                        path="/blogs/:id"
+                        element={
+                            <Blog user={user} blog={matchedBlog} />
+                        }></Route>
+                    <Route
+                        path="/users/:id"
+                        element={<User user={matchedUser} />}></Route>
+                    <Route path="/users" element={<UserList />}></Route>
+                </Routes>
+            </div>
+        );
+    }
 };
 
 export default App;

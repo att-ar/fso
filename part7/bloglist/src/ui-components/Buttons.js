@@ -38,3 +38,7 @@ export const DeleteButton = ({ onDelete }) => (
         onClick={onDelete}
     />
 );
+
+export const LogInOutButton = ({ text, onClick }) => (
+    <Button className="tiny" color="grey" content={text} onClick={onClick} />
+);

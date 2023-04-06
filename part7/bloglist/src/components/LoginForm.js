@@ -2,30 +2,22 @@
 import { useDispatch } from "react-redux";
 import { useField } from "../hooks";
 
-import { setNotification } from "../reducers/notificationReducer";
 import { loginUser } from "../reducers/loginReducer";
 
 const LoginForm = () => {
-    const { reset: resetUsername, ...username } = useField("text", "username");
-    const { reset: resetPassword, ...password } = useField(
-        "password",
-        "password"
-    );
+    const { reset: resetUsername, ...username } = useField("text", "");
+    const { reset: resetPassword, ...password } = useField("password", "");
 
     const dispatch = useDispatch();
 
     const handleLogin = (event) => {
         event.preventDefault();
-        try {
-            dispatch(
-                loginUser({
-                    username: username.value,
-                    password: password.value,
-                })
-            );
-        } catch (exception) {
-            dispatch(setNotification("wrong credentials", 4, "error"));
-        }
+        dispatch(
+            loginUser({
+                username: username.value,
+                password: password.value,
+            })
+        );
         resetPassword();
         resetUsername();
     };
