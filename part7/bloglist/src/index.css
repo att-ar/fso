@@ -1,3 +1,22 @@
+button {
+    padding: 2px 3px 2px 3px;
+    border-radius: 4px;
+}
+
+button:hover {
+    background-color: lightblue;
+    color: darkred;
+}
+
+.page {
+    padding: 10px;
+    background-color: rgb(251, 241, 231);
+}
+
+body {
+    background-color: rgb(251, 241, 231);
+}
+
 .success {
     color: darkgreen;
     background: lightgreen;
@@ -29,7 +48,9 @@
 }
 
 .menu {
+    position: relative;
     padding: 5px;
+    margin-bottom: 15px;
     color: darkred;
     border: solid;
     border-width: 3px;
@@ -45,9 +66,13 @@
     text-decoration: none;
 }
 
+.menuItem:hover {
+    color: rgb(240, 224, 192);
+}
+
 .blogList {
-    padding-top: 10px;
-    padding-left: 2px;
+    margin-top: 6px;
+    padding: 5px;
     border: solid;
     border-width: 1px;
     border-radius: 5px;

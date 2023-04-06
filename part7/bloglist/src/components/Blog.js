@@ -1,19 +1,10 @@
 import { useDispatch } from "react-redux";
-import PropTypes from "prop-types";
 
 import CommentForm from "./CommentForm";
+import { LikeButton, LinkButton, DeleteButton } from "../ui-components/Buttons";
 
 import { likeBlog, deleteBlog } from "../reducers/blogReducer";
 import { setNotification } from "../reducers/notificationReducer";
-
-const ButtonBlog = ({ text, handleClick }) => {
-    return <button onClick={handleClick}>{text}</button>;
-};
-ButtonBlog.propTypes = {
-    text: PropTypes.string.isRequired,
-    handleClick: PropTypes.func.isRequired,
-};
-ButtonBlog.displayName = "ButtonBlog";
 
 const Blog = ({ user, blog }) => {
     const dispatch = useDispatch();
@@ -41,18 +32,21 @@ const Blog = ({ user, blog }) => {
                     <h2>
                         {blog.title} by {blog.author}
                     </h2>
-                    url: <a href={blog.url}>{blog.url}</a>
+                    <LikeButton onLike={handleLike} likes={blog.likes} />
+                    <LinkButton url={blog.url} />
+                    {user.username === blog.user.username ? (
+                        <DeleteButton onDelete={handleDelete} />
+                    ) : null}
                     <br></br>
-                    likes: {blog.likes}
-                    <ButtonBlog text="like" handleClick={handleLike} />
-                    <br></br>
-                    added by {blog.user.name}
-                </div>
-                {user.username === blog.user.username ? (
-                    <div>
-                        <ButtonBlog text="remove" handleClick={handleDelete} />
+                    <div
+                        style={{
+                            marginTop: 10,
+                            fontWeight: "bold",
+                            fontSize: 16,
+                        }}>
+                        Posted by {user.name}
                     </div>
-                ) : null}
+                </div>
                 <h3>Comments</h3>
                 <CommentForm id={blog.id} />
                 <ul>

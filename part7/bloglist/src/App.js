@@ -1,15 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import {
-    // BrowserRouter as Router,
-    Routes,
-    Route,
-    Link,
-    // Navigate,
-    // useParams,
-    // useNavigate,
-    useMatch,
-} from "react-router-dom";
+import { Routes, Route, Link, useMatch } from "react-router-dom";
 
 import BlogList from "./components/BlogList";
 import Blog from "./components/Blog";
@@ -76,7 +67,7 @@ const App = () => {
 
     if (!user) {
         return (
-            <div>
+            <div className="page">
                 <Notification />
                 <h2>Log in to application</h2>
                 <Togglable buttonLabel="log in">
@@ -86,23 +77,22 @@ const App = () => {
         );
     }
     return (
-        <div>
+        <div className="page">
             <div className="menu">
                 <Menu />
                 <span
                     style={{
                         position: "absolute",
-                        paddingTop: 2,
                         color: "white",
                         fontSize: 18,
-                        right: 25,
+                        right: 10,
                     }}>
                     {user.name + " logged in "}
                     <button onClick={handleLogout}>log out</button>
                 </span>
             </div>
             <div style={{ padding: "5 0 5 0" }}>
-                <h2>Blog App</h2>
+                <h2 style={{ color: "rgb(120, 107, 95)" }}>Blog App</h2>
                 <Notification />
             </div>
             <Routes>
