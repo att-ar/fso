@@ -19,3 +19,39 @@
     padding: 10px;
     margin-bottom: 10px;
 }
+
+.link {
+    padding: 10px;
+    color: darkblue;
+    font-size: 17px;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.menu {
+    padding: 5px;
+    color: darkred;
+    border: solid;
+    border-width: 3px;
+    background-color: brown;
+    border-radius: 5px;
+}
+
+.menuItem {
+    padding: 5px;
+    color: white;
+    font-size: 20px;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.blogList {
+    padding-top: 10px;
+    padding-left: 2px;
+    border: solid;
+    border-width: 1px;
+    border-radius: 5px;
+    margin-bottom: 5px;
+    color: grey;
+    background: beige;
+}
