@@ -2,7 +2,6 @@ import { useNotifValue } from "../contexts/NotificationContext";
 
 const Notification = () => {
     const { notif, status } = useNotifValue();
-    // console.log(notif);
     if (notif === null) {
         return null;
     }

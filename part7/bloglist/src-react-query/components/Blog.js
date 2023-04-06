@@ -46,13 +46,11 @@ const Blog = ({ user, blog, displayMessage }) => {
         },
     });
     const handleLike = () => {
-        console.log(blog);
         const likedBlog = {
             ...blog,
             user: blog.user.id,
             likes: blog.likes + 1,
         };
-        console.log(likedBlog);
         likeBlogMutation.mutate(likedBlog);
     };
 

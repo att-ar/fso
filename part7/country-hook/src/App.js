@@ -21,7 +21,6 @@ const useCountry = (name) => {
     // see the fetch event handler below
 
     useEffect(() => {
-        console.log(name);
         axios
             .get(
                 `https://restcountries.com/v3.1/name/${name}?fields=name,capital,population,flags`
