@@ -39,11 +39,11 @@ const BlogForm = ({ toggle }) => {
     return (
         <form onSubmit={addBlog}>
             <p>
-                title: <input id="title" {...title} />
+                <input id="title" {...title} />
                 <br></br>
-                author: <input id="author" {...author} />
+                <input id="author" {...author} />
                 <br></br>
-                url: <input id="url" {...url} />
+                <input id="url" {...url} />
                 <br></br>
             </p>
             <button id="submit-blog" type="submit">

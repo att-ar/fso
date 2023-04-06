@@ -1,4 +1,5 @@
 import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 import CommentForm from "./CommentForm";
 import { LikeButton, LinkButton, DeleteButton } from "../ui-components/Buttons";
@@ -8,6 +9,7 @@ import { setNotification } from "../reducers/notificationReducer";
 
 const Blog = ({ user, blog }) => {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     const handleLike = async () => {
         const likedBlog = {
@@ -23,6 +25,7 @@ const Blog = ({ user, blog }) => {
         if (window.confirm(`Remove ${blog.title} by ${blog.author}?`)) {
             dispatch(deleteBlog(blog.id));
             dispatch(setNotification(`Delete ${blog.title}`, 4, "success"));
+            navigate("/");
         }
     };
     if (blog) {
