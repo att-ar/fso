@@ -1,26 +1,37 @@
-import { useState } from 'react'
-import Authors from './components/Authors'
-import Books from './components/Books'
-import NewBook from './components/NewBook'
+import Authors from "./components/Authors";
+import Books from "./components/Books";
+import NewBook from "./components/NewBook";
+
+import { Routes, Route, Link } from "react-router-dom";
 
 const App = () => {
-  const [page, setPage] = useState('authors')
+    const linkSpace = {
+        margin: 5,
+        padding: 4,
+        borderRadius: 6,
+        textDecoration: "none",
+        background: "lightgreen",
+    };
+    return (
+        <div>
+            <div style={{ background: "green", borderRadius: 4 }}>
+                <Link style={linkSpace} to="/">
+                    authors
+                </Link>
+                <Link style={linkSpace} to="/books">
+                    books
+                </Link>
+                <Link style={linkSpace} to="/add">
+                    add
+                </Link>
+            </div>
+            <Routes>
+                <Route path="/" element={<Authors />} />
+                <Route path="/books" element={<Books />} />
+                <Route path="/add" element={<NewBook />} />
+            </Routes>
+        </div>
+    );
+};
 
-  return (
-    <div>
-      <div>
-        <button onClick={() => setPage('authors')}>authors</button>
-        <button onClick={() => setPage('books')}>books</button>
-        <button onClick={() => setPage('add')}>add book</button>
-      </div>
-
-      <Authors show={page === 'authors'} />
-
-      <Books show={page === 'books'} />
-
-      <NewBook show={page === 'add'} />
-    </div>
-  )
-}
-
-export default App
+export default App;
