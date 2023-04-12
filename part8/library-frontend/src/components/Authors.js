@@ -10,7 +10,22 @@ const BirthForm = ({ authors }) => {
 
     const options = authors.map((a) => ({ value: a.name, label: a.name }));
     const [editBirth, result] = useMutation(EDIT_BIRTH, {
-        refetchQueries: [{ query: ALL_BOOKS }, { query: ALL_AUTHORS }],
+        //updating the books query is too complicated rn
+        refetchQueries: [{ query: ALL_BOOKS }],
+        onError: (error) => {
+            console.log(error.graphQLErrors[0].message);
+        },
+        update: (cache, response) => {
+            cache.updateQuery({ query: ALL_AUTHORS }, ({ allAuthors }) => {
+                return {
+                    allAuthors: allAuthors.map((a) =>
+                        a.id !== response.data.editAuthor.id
+                            ? a
+                            : response.data.editAuthor
+                    ),
+                };
+            });
+        },
     });
     const handleSubmit = (event) => {
         event.preventDefault();
@@ -19,7 +34,6 @@ const BirthForm = ({ authors }) => {
             variables: { name: chosen.value, setBornTo: Number(year) },
         });
 
-        setChosen(null);
         setYear("");
     };
 

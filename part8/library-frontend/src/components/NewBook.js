@@ -1,23 +1,38 @@
 import { useState } from "react";
 import { useMutation } from "@apollo/client";
+import { useNavigate } from "react-router-dom";
 
 import { CREATE_BOOK, ALL_BOOKS, ALL_AUTHORS } from "../queries";
+import { useField } from "../hooks";
 
 const NewBook = () => {
-    const [title, setTitle] = useState("");
-    const [author, setAuthor] = useState("");
-    const [published, setPublished] = useState("");
-    const [genre, setGenre] = useState("");
+    const { reset: resetTitle, ...title } = useField("text");
+    const { reset: resetAuthor, ...author } = useField("text");
+    const { reset: resetPublished, ...published } = useField("number");
+    const { reset: resetGenre, ...genre } = useField("text");
     const [genres, setGenres] = useState([]);
 
+    const navigate = useNavigate();
+
     const [createBook] = useMutation(CREATE_BOOK, {
-        refetchQueries: [{ query: ALL_BOOKS }, { query: ALL_AUTHORS }],
+        refetchQueries: [{ query: ALL_AUTHORS }],
         onError: (error) => {
-            const errors = error.graphQLErrors[0].extensions.error.errors;
-            const messages = Object.values(errors)
-                .map((e) => e.message)
-                .join("\n");
-            console.log(messages);
+            console.log(error.graphQLErrors[0].message);
+        },
+        update: (cache, response) => {
+            cache.updateQuery({ query: ALL_BOOKS }, ({ allBooks }) => {
+                return {
+                    allBooks: allBooks.concat(response.data.addBook),
+                };
+            });
+            navigate("/books");
+            //too complicated to update authors manually rn
+            // cache.updateQuery({query: ALL_AUTHORS}, ({allAuthors}) => {
+            //     author = allAuthors.find(a => a.name === response.data.addBook.author)
+            //     return {
+            //         allAuthors: allAuth
+            //     }
+            // })
         },
     });
 
@@ -25,19 +40,24 @@ const NewBook = () => {
         event.preventDefault();
 
         createBook({
-            variables: { title, author, published: Number(published), genres },
+            variables: {
+                title: title.value,
+                author: author.value,
+                published: Number(published.value),
+                genres,
+            },
         });
 
-        setTitle("");
-        setPublished("");
-        setAuthor("");
+        resetTitle();
+        resetPublished();
+        resetAuthor();
         setGenres([]);
-        setGenre("");
+        resetGenre();
     };
 
     const addGenre = () => {
-        setGenres(genres.concat(genre));
-        setGenre("");
+        setGenres(genres.concat(genre.value));
+        resetGenre();
     };
 
     //the button type "number" gives arrows for changing the value
@@ -46,37 +66,37 @@ const NewBook = () => {
             <form onSubmit={submit}>
                 <div>
                     title
-                    <input
-                        value={title}
-                        onChange={({ target }) => setTitle(target.value)}
-                    />
+                    <input {...title} />
                 </div>
                 <div>
                     author
-                    <input
-                        value={author}
-                        onChange={({ target }) => setAuthor(target.value)}
-                    />
+                    <input {...author} />
                 </div>
                 <div>
                     published
-                    <input
-                        type="number"
-                        value={published}
-                        onChange={({ target }) => setPublished(target.value)}
-                    />
+                    <input {...published} />
                 </div>
                 <div>
-                    <input
-                        value={genre}
-                        onChange={({ target }) => setGenre(target.value)}
-                    />
+                    <input {...genre} />
                     <button onClick={addGenre} type="button">
                         add genre
                     </button>
                 </div>
                 <div>genres: {genres.join(" ")}</div>
-                <button type="submit">create book</button>
+                <div style={{ marginTop: 4 }}>
+                    <button type="submit">create book</button>
+                    <button
+                        type="button"
+                        onClick={() => {
+                            resetTitle();
+                            resetAuthor();
+                            resetPublished();
+                            resetGenre();
+                            setGenres([]);
+                        }}>
+                        clear form
+                    </button>
+                </div>
             </form>
         </div>
     );
