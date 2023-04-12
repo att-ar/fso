@@ -1,0 +1,35 @@
+button:hover {
+    background-color: white;
+}
+
+.link {
+    margin: 5px;
+    padding: 4px;
+    border-radius: 6px;
+    text-decoration: none;
+    background: lightgreen;
+    font-size: 17px;
+    font-weight: bold;
+}
+
+.link:hover {
+    background: white;
+}
+
+.log {
+    margin: 5px;
+    padding: 4px;
+    border-radius: 6px;
+    background: rgb(197, 215, 255);
+    font-size: 16px;
+}
+
+.link:hover {
+    background: white;
+}
+
+.nav {
+    background: green;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}

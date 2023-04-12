@@ -5,19 +5,22 @@ import Authors from "./components/Authors";
 import Books from "./components/Books";
 import NewBook from "./components/NewBook";
 import LoginForm from "./components/LoginForm";
+import Recommendations from "./components/Recommendations";
 
 import { Routes, Route, Link } from "react-router-dom";
 
 const App = () => {
     const [token, setToken] = useState(null);
     const client = useApolloClient();
-    const linkSpace = {
-        margin: 5,
-        padding: 4,
-        borderRadius: 6,
-        textDecoration: "none",
-        background: "lightgreen",
-    };
+    // const linkSpace = {
+    //     margin: 5,
+    //     padding: 4,
+    //     borderRadius: 6,
+    //     textDecoration: "none",
+    //     background: "lightgreen",
+    //     fontSize: 17,
+    //     fontWeight: "bold",
+    // };
 
     useEffect(() => {
         const prevToken = localStorage.getItem("book-user-token");
@@ -33,39 +36,26 @@ const App = () => {
 
     return (
         <div>
-            <div
-                style={{
-                    background: "green",
-                    borderRadius: 4,
-                    position: "relative",
-                    marginBottom: 10,
-                }}>
-                <Link style={linkSpace} to="/">
+            <div className="nav">
+                <Link className="link" to="/">
                     authors
                 </Link>
-                <Link style={linkSpace} to="/books">
+                <Link className="link" to="/books">
                     books
                 </Link>
                 {!token ? (
-                    <Link
-                        style={{
-                            ...linkSpace,
-                            background: "lightcyan",
-                        }}
-                        to="/login">
+                    <Link className="log" to="/login">
                         login
                     </Link>
                 ) : (
                     <>
-                        <Link style={linkSpace} to="/add">
+                        <Link className="link" to="/add">
                             add
                         </Link>
-                        <button
-                            style={{
-                                ...linkSpace,
-                                background: "lightcyan",
-                            }}
-                            onClick={logout}>
+                        <Link className="link" to="/recs">
+                            recommended
+                        </Link>
+                        <button className="log" onClick={logout}>
                             logout
                         </button>
                     </>
@@ -74,7 +64,12 @@ const App = () => {
             <Routes>
                 <Route path="/" element={<Authors />} />
                 <Route path="/books" element={<Books />} />
-                {token && <Route path="/add" element={<NewBook />} />}
+                {token && (
+                    <>
+                        <Route path="/add" element={<NewBook />} />
+                        <Route path="/recs" element={<Recommendations />} />
+                    </>
+                )}
                 <Route
                     path="/login"
                     element={<LoginForm setToken={setToken} />}

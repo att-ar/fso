@@ -10,6 +10,7 @@ import {
 import { setContext } from "@apollo/client/link/context";
 
 import App from "./App";
+import "./index.css";
 
 const authLink = setContext((_, { headers }) => {
     const token = localStorage.getItem("book-user-token");
