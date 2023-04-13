@@ -14,7 +14,12 @@ const FilterBar = ({ genres, setFilter }) => {
 
 const Books = () => {
     const [filter, setFilter] = useState(null);
-    const result = useQuery(ALL_BOOKS);
+    const bookFilter = filter ? { genre: filter } : {};
+    const result = useQuery(ALL_BOOKS, {
+        variables: {
+            bookFilter,
+        },
+    });
     if (result.loading) {
         return <div>loading...</div>;
     }

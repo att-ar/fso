@@ -4,7 +4,7 @@ import { LOGIN } from "../queries";
 import { useField } from "../hooks";
 import { useNavigate } from "react-router-dom";
 
-const LoginForm = ({ setToken }) => {
+const LoginForm = ({ setToken, setError }) => {
     const { reset: resetUsername, ...username } = useField("text");
     const { reset: resetPassword, ...password } = useField("password");
 
@@ -12,7 +12,7 @@ const LoginForm = ({ setToken }) => {
 
     const [login, result] = useMutation(LOGIN, {
         onError: (error) => {
-            console.log(error.graphQLErrors[0].message);
+            setError(error.graphQLErrors[0].message);
         },
     });
     // Use of the effect hook is necessary to avoid an endless rendering loop.
