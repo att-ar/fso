@@ -19,20 +19,26 @@ const Books = () => {
         variables: {
             bookFilter,
         },
+        fetchPolicy: "network-only",
     });
     if (result.loading) {
         return <div>loading...</div>;
     }
 
     const books = result.data.allBooks;
-
-    //returns the non duplicates, by checking if the occurence of a value is the first
-    // occurrence in an array, got this from stackoverflow
-    const onlyUnique = (value, index, array) => array.indexOf(value) === index;
-    const genres = books.map((b) => b.genres);
-    //flat brings the nested components to the surface array
-    const uniqueGenres = genres.flat().filter(onlyUnique);
-    uniqueGenres.push("all genres");
+    let uniqueGenres;
+    if (!filter) {
+        //returns the non duplicates, by checking if the occurence of a value is the first
+        // occurrence in an array, got this from stackoverflow
+        const onlyUnique = (value, index, array) =>
+            array.indexOf(value) === index;
+        const genres = books.map((b) => b.genres);
+        //flat brings the nested components to the surface array
+        uniqueGenres = genres.flat().filter(onlyUnique);
+        uniqueGenres.push("all genres");
+    } else {
+        uniqueGenres = ["all genres"];
+    }
 
     return (
         <div>
