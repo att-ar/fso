@@ -1,5 +1,5 @@
 ### Full Stack Open from the University of Helsinki, Finland
 
-My assignment submissions for Part 1, 2, 5, 6, and 7
+My assignment submissions for Part 1, 2, 5, 6, 7, and 8
 
-Part 3 and 4: [found here](https://github.com/att-ar/fso-backend)
+Backend Parts: [fso-backend](https://github.com/att-ar/fso-backend)
