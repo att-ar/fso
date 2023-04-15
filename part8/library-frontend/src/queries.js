@@ -1,5 +1,16 @@
 import { gql } from "@apollo/client";
 
+const BOOK_DETAILS = gql`
+    fragment BookDetails on Book {
+        title
+        author {
+            name
+        }
+        published
+        genres
+    }
+`;
+
 export const ALL_AUTHORS = gql`
     query {
         allAuthors {
@@ -14,28 +25,11 @@ export const ALL_AUTHORS = gql`
 export const ALL_BOOKS = gql`
     query getBooks($bookFilter: BookFilter) {
         allBooks(bookFilter: $bookFilter) {
-            title
-            author {
-                name
-            }
-            published
-            genres
+            ...BookDetails
         }
     }
+    ${BOOK_DETAILS}
 `;
-
-// export const FILTER_BOOKS = gql`
-//     query getBooks($author: String, $genre: String) {
-//         allBooks {
-//             title
-//             author {
-//                 name
-//             }
-//             published
-//             genres
-//         }
-//     }
-// `;
 
 export const ME = gql`
     query {
@@ -59,14 +53,20 @@ export const CREATE_BOOK = gql`
             author: $author
             genres: $genres
         ) {
-            title
-            author {
-                name
-            }
-            published
-            genres
+            ...BookDetails
         }
     }
+    ${BOOK_DETAILS}
+`;
+
+// just the title and author is enough for the notif
+export const BOOK_ADDED = gql`
+    subscription {
+        bookAdded {
+            ...BookDetails
+        }
+    }
+    ${BOOK_DETAILS}
 `;
 
 export const EDIT_BIRTH = gql`

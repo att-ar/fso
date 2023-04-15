@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useMutation } from "@apollo/client";
 import { useNavigate } from "react-router-dom";
 
-import { CREATE_BOOK, ALL_BOOKS, ALL_AUTHORS } from "../queries";
+import { CREATE_BOOK, ALL_AUTHORS } from "../queries";
 import { useField } from "../hooks";
 
 const NewBook = () => {
@@ -14,25 +14,14 @@ const NewBook = () => {
 
     const navigate = useNavigate();
 
+    // I got rid of the update trigger because the subscription updates the cache anyways
     const [createBook] = useMutation(CREATE_BOOK, {
         refetchQueries: [{ query: ALL_AUTHORS }],
         onError: (error) => {
             console.log(error.graphQLErrors[0].message);
         },
-        update: (cache, response) => {
-            cache.updateQuery({ query: ALL_BOOKS }, ({ allBooks }) => {
-                return {
-                    allBooks: allBooks.concat(response.data.addBook),
-                };
-            });
+        onCompleted: () => {
             navigate("/books");
-            //too complicated to update authors manually rn
-            // cache.updateQuery({query: ALL_AUTHORS}, ({allAuthors}) => {
-            //     author = allAuthors.find(a => a.name === response.data.addBook.author)
-            //     return {
-            //         allAuthors: allAuth
-            //     }
-            // })
         },
     });
 
